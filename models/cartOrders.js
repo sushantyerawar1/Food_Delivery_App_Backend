@@ -29,7 +29,12 @@ const cartOrderSchema = new mongoose.Schema(
                 type: String,
                 // ref : "Item",
                 required: true,
-            }
+            },
+            imageLink: {
+                type: String,
+                // ref : "Item",
+                required: false,
+            },
         }],
 
     }
@@ -53,7 +58,8 @@ cartOrderSchema.methods.addItem = function (item) {
             name: item.name,
             price: item.price,
             quantity: 1,
-            itemID: item._id
+            itemID: item._id,
+            imageLink: item.imageLink
         });
 
     }
