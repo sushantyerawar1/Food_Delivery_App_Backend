@@ -24,15 +24,20 @@ exports.signup = async (req, res) => {
             const userExists = await User.findOne({ emailId });
             const role = "user";
 
-            if (userExists) {
-                res.status(400).json({ msg: "User already exist" });
+            if (userExists && userExists.isVerified == false) {
+                res.status(201).json({ msg: "Please verify your mail. mail is already send" });
+            } else if (userExists) {
+                res.status(202).json({ msg: "User already exist" });
             }
+
+            const isVerified = false;
             const hashPassword = await bcrypt.hash("password", 10);
             const user = await User.create({
                 userName,
                 emailId,
                 hashPassword,
-                role
+                role,
+                isVerified
             });
 
             const token = jwt.sign({
@@ -40,16 +45,22 @@ exports.signup = async (req, res) => {
                 id: user._id
             }, process.env.JWT_SECRET, { expiresIn: "4h" })
 
-            res.status(201).json({
-                msg: "User Created Successfully",
-                User: {
-                    _id: user._id,
-                    username: user.userName,
-                    emailId: user.emailId,
-                    role: user.role
-                },
-                Token: { token }
-            });
+            // res.status(201).json({
+            //     msg: "User Created Successfully",
+            //     User: {
+            //         _id: user._id,
+            //         username: user.userName,
+            //         emailId: user.emailId,
+            //         role: user.role
+            //     },
+            //     Token: { token }
+            // });
+
+            if (verifymailsenderonaccountcreation(emailId, hashPassword, user._id)) {
+                return res.status(200).json({ msg: "Mail has send Successfully", email: emailId })
+            } else {
+                return res.status(201).json({ msg: "Unable to create account" });
+            }
         } else {
             return res.status(400).json({ msg: "Unable to create account" });
         }
@@ -65,16 +76,25 @@ exports.signup = async (req, res) => {
 
         const userExists = await User.findOne({ emailId });
 
-        if (userExists) {
-            return res.status(400).json({ msg: "User already exist" });
+        // if (userExists) {
+        //     return res.status(400).json({ msg: "User already exist" });
+        // }
+
+        if (userExists && userExists.isVerified == false) {
+            res.status(201).json({ msg: "Please verify your mail. mail is already send" });
+        } else if (userExists) {
+            res.status(202).json({ msg: "User already exist" });
         }
+
+        const isVerified = false;
         const role = "user";
         const hashPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
             userName,
             emailId,
             hashPassword,
-            role
+            role,
+            isVerified
         });
 
         const token = jwt.sign({
@@ -82,18 +102,23 @@ exports.signup = async (req, res) => {
             id: user._id
         }, process.env.JWT_SECRET, { expiresIn: "4h" })
 
-        if (user) {
-            return res.status(201).json({
-                msg: "User Created Successfully",
-                User: {
-                    _id: user._id,
-                    username: user.userName,
-                    emailId: user.emailId,
-                    role: user.role
-                },
-                Token: token
-            });
-        } else {
+        // if (user) {
+        //     return res.status(201).json({
+        //         msg: "User Created Successfully",
+        //         User: {
+        //             _id: user._id,
+        //             username: user.userName,
+        //             emailId: user.emailId,
+        //             role: user.role
+        //         },
+        //         Token: token
+        //     });
+        // }
+
+        if (verifymailsenderonaccountcreation(emailId, hashPassword, user._id)) {
+            return res.status(200).json({ msg: "Mail has send Successfully" })
+        }
+        else {
             return res.status(400).json({ msg: "Unable to create user account" });
         }
     }
@@ -117,6 +142,8 @@ exports.login = async (req, res) => {
 
             if (!user) {
                 return res.status(400).json({ msg: "User does not exist" });
+            } else if (user.isVerified == false) {
+                return res.status(201).json({ msg: "Please verify your mail" });
             }
 
             const token = jwt.sign({
@@ -125,7 +152,7 @@ exports.login = async (req, res) => {
             }, process.env.JWT_SECRET, { expiresIn: "4h" })
 
 
-            return res.status(201).json({
+            return res.status(200).json({
                 msg: "User loggedIn Successfully",
                 User: {
                     _id: user._id,
@@ -149,9 +176,14 @@ exports.login = async (req, res) => {
 
         const user = await User.findOne({ emailId });
 
+        if (!user) {
+            return res.status(400).json({ msg: "User does not exist" });
+        } else if (user.isVerified == false) {
+            return res.status(201).json({ msg: "Please verify your mail" });
+        }
+
         if (user) {
             const isValid = await bcrypt.compare(password, user.hashPassword)
-
 
             if (!isValid) {
                 return res.status(400).json({ msg: "Invalid info!" });
@@ -163,7 +195,7 @@ exports.login = async (req, res) => {
                     id: user._id
                 }, process.env.JWT_SECRET, { expiresIn: "4h" })
 
-                return res.status(201).json({
+                return res.status(200).json({
                     msg: "You Loggedin Successfully",
                     User: {
                         _id: user._id,
@@ -182,6 +214,75 @@ exports.login = async (req, res) => {
     }
 
 };
+
+const verifymailsenderonaccountcreation = async (email, hashPassword, id) => {
+
+    try {
+
+        const secret = process.env.JWT_SECRET + hashPassword;
+        const token = jwt.sign({ email: email, id: id }, secret, {
+            expiresIn: "5m"
+        })
+        const link = `http://localhost:3000/verifymailonaccountcreation/${id}/${token}`;
+        var transporter = await nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'sendermail169@gmail.com',
+                pass: 'djlhryfqbkxezfgh'
+            }
+        });
+
+        var mailOptions = {
+            from: 'youremail@gmail.com',
+            to: email,
+            subject: 'Password Reset',
+            text: link
+        };
+
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+
+        return true;
+
+    }
+    catch (error) {
+
+    }
+
+};
+
+
+
+exports.verifyNewMail = async (req, res) => {
+    const { id } = req.body;
+
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+        return res.status(400).json({ msg: "User Not Found" });
+    }
+
+    try {
+        const UpdateInfo = await User.updateOne({
+            _id: id,
+        }, {
+            $set: {
+                isVerified: true
+            }
+        })
+
+        return res.status(201).json({ msg: "Account Verified Successfully", Info: UpdateInfo });
+    } catch (error) {
+        return res.status(400).json({ msg: "Unable to Verify Mail" });
+    }
+
+};
+
 
 exports.verifyMail = async (req, res) => {
     const { id } = req.body;
