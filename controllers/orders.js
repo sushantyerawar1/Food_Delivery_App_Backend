@@ -1,13 +1,14 @@
 const Orders = require('../models/orders')
 
 exports.addOrder = async (req, res) => {
-    const { userId, hotelId, cartItems, hotelName } = req.body;
+    const { userId, hotelId, cartItems, hotelName, userName } = req.body;
     const orderAcceptOrDecline = "NULL";
-    const orderStatus = "NULL";
+    const orderStatus = "Pending";
     const order = await Orders.create({
         userId,
         hotelId,
         hotelName,
+        userName,
         cartItems,
         orderAcceptOrDecline,
         orderStatus,
