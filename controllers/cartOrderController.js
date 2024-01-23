@@ -6,7 +6,7 @@ const catchAsyncError = require('../middlewares/catchAsyncError');
 exports.addToCart = catchAsyncError(
     async (req, res, next) => {
         try {
-            const { hotelID, item } = req.body;
+            const { hotelID, item, hotelName } = req.body;
             const userID = req.userID;
 
             var cart = await cartOrder.findOne({ userID: userID, hotelID: hotelID });
@@ -16,6 +16,7 @@ exports.addToCart = catchAsyncError(
                 cart = await cartOrder.create({
                     userID: userID,
                     hotelID: hotelID,
+                    hotelName: hotelName,
                     orderItems: [],
                 })
             }

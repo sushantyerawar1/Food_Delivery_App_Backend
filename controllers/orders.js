@@ -1,12 +1,13 @@
 const Orders = require('../models/orders')
 
 exports.addOrder = async (req, res) => {
-    const { userId, hotelId, cartItems } = req.body;
+    const { userId, hotelId, cartItems, hotelName } = req.body;
     const orderAcceptOrDecline = "NULL";
     const orderStatus = "NULL";
     const order = await Orders.create({
         userId,
         hotelId,
+        hotelName,
         cartItems,
         orderAcceptOrDecline,
         orderStatus,
@@ -84,5 +85,37 @@ exports.deliveredOrder = async (req, res) => {
     }
     catch (error) {
         return res.status(400).json({ msg: "Something wrong" });
+    }
+}
+
+exports.getOrderByUser = async (req, res) => {
+    const { userId } = req.body
+    try {
+        const userOrders = await Orders.find({ userId: userId });
+        if (!userOrders) {
+            return res.status(400).json({ msg: "No such user exists" });
+        }
+        else {
+            return res.status(201).json({ msg: "Orders fetched successfully", userOrders: userOrders });
+        }
+    }
+    catch (error) {
+        return res.status(400).json({ msg: "Something went wrong", err: error });
+    }
+}
+
+exports.getOrderByHotel = async (req, res) => {
+    const { hotelId } = req.body
+    try {
+        const hotelOrders = await Orders.find({ hotelId: hotelId });
+        if (!hotelOrders) {
+            return res.status(400).json({ msg: "No such user exists" });
+        }
+        else {
+            return res.status(201).json({ msg: "Orders fetched successfully", hotelOrders: hotelOrders });
+        }
+    }
+    catch (error) {
+        return res.status(400).json({ msg: "Something went wrong", err: error });
     }
 }
