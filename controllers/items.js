@@ -1,11 +1,8 @@
 const Items = require('../models/items')
 
 exports.addItem = async (req, res) => {
-    const { name, hotelId, price, imageLink, quantity, availabilityStatus, description } = req.body;
+    const { name, hotelId, price, imageLink, quantity, availabilityStatus, description, rating } = req.body;
 
-    console.log(name, hotelId)
-
-    const rating = 0;
     const reviews = [];
 
     try {
@@ -21,9 +18,9 @@ exports.addItem = async (req, res) => {
 
 exports.getItems = async (req, res) => {
 
-    // const { itemId } = req.params;
+    const { id } = req.body;
     try {
-        const items = await Items.find();
+        const items = await Items.find({ hotelId: id });
         return res.status(201).json({
             "msg": "Items sent",
             "items": items
@@ -59,6 +56,7 @@ exports.updateItem = async (req, res) => {
         quantity,
         availabilityStatus,
         description,
+        rating
     } = req.body;
 
     try {
@@ -74,7 +72,8 @@ exports.updateItem = async (req, res) => {
                 imageLink,
                 quantity,
                 availabilityStatus,
-                description
+                description,
+                rating
             });
             // console.log('OrderUpdated', UpdatedItem);
             return res.status(200).json({ msg: "Item Updated Successfully" });

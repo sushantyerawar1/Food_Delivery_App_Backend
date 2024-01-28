@@ -4,7 +4,7 @@ const { addItem, getItems, deleteItem, updateItem } = require('./../controllers/
 const router = express.Router();
 
 router.post('/additem', addItem);
-router.get('/getitems', getItems);
+router.post('/getitems', getItems);
 router.post('/deleteitem', deleteItem);
 router.post('/updateitem', updateItem);
 
