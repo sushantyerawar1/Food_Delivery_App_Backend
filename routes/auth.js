@@ -1,9 +1,10 @@
 const express = require('express')
-const { signup, login, forgotpassword, resetpassword, resetpassworddone, verifyMail, verifyNewMail } = require('../controllers/auth')
+const { signup, login, forgotpassword, resetpassword, resetpassworddone, verifyMail, verifyNewMail, getHotels } = require('../controllers/auth')
 
 const router = express.Router();
 
 router.post('/signup', signup);
+router.get('/hotels', getHotels);
 router.post('/login', login);
 router.post('/forgot-password', forgotpassword);
 router.get('/reset-password/:id/:token', resetpassword);
