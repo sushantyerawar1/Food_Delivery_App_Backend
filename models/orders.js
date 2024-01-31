@@ -21,6 +21,11 @@ const orderSchema = new mongoose.Schema({
         // ref: 'User',
         required: true,
     },
+    amount: {
+        type: Number,
+        // ref: 'User',
+        required: true,
+    },
     cartItems: [
         {
             name: {
