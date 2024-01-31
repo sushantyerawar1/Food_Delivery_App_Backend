@@ -35,6 +35,10 @@ const itemSchema = new mongoose.Schema({
         type: Number,
         required: false,
     },
+    category: {
+        type: String,
+        required: false,
+    },
     reviews: [
         {
             type: String,

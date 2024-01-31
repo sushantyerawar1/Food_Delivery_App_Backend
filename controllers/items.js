@@ -1,15 +1,13 @@
 const Items = require('../models/items')
 
 exports.addItem = async (req, res) => {
-    const { name, hotelId, price, imageLink, quantity, availabilityStatus, description, rating } = req.body;
+    const { name, hotelId, price, imageLink, quantity, availabilityStatus, description, rating, category } = req.body;
 
     const reviews = [];
 
     try {
-
-        const item = await Items.create({ name, hotelId, price, imageLink, quantity, availabilityStatus, description, rating, reviews });
+        const item = await Items.create({ name, hotelId, price, imageLink, quantity, availabilityStatus, description, rating, reviews, category });
         return res.status(201).json({ msg: "Item Added Successfully", Item: { _id: item._id, }, });
-
     }
     catch {
         return res.status(400).json({ msg: "Unable to Add Item" });
@@ -56,7 +54,8 @@ exports.updateItem = async (req, res) => {
         quantity,
         availabilityStatus,
         description,
-        rating
+        rating,
+        category
     } = req.body;
 
     try {
@@ -73,7 +72,8 @@ exports.updateItem = async (req, res) => {
                 quantity,
                 availabilityStatus,
                 description,
-                rating
+                rating,
+                category
             });
             // console.log('OrderUpdated', UpdatedItem);
             return res.status(200).json({ msg: "Item Updated Successfully" });
