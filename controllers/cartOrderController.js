@@ -54,6 +54,7 @@ exports.removeToCart = catchAsyncError(
 exports.getCart = async (req, res, next) => {
     const hotelID = req.params.id;
     const userID = req.userID;
+
     const cart = await cartOrder.find({ userID: userID, hotelID: hotelID });
 
     if (cart.length == 0) {
