@@ -64,9 +64,7 @@ exports.getCart = async (req, res, next) => {
         const orderItems = cart[0]?.orderItems;
         res.status(200).send({ message: "cart found", items: orderItems });
     }
-}
-
-    ;
+};
 
 
 exports.deleteCart = catchAsyncError(async (req, res, next) => {
@@ -83,7 +81,7 @@ exports.deleteCart = catchAsyncError(async (req, res, next) => {
 exports.removeFromCart = catchAsyncError(async (req, res, next) => {
     const itemID = req.query.itemID;
     const hotelID = req.query.hotelID;
-    const userID = req.userID;
+    const userID = req.body.userID;
     console.log(itemID)
     var cart = await cartOrder.findOne({ userID: userID, hotelID: hotelID });
     if (cart) {
