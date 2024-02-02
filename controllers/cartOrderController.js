@@ -58,7 +58,7 @@ exports.getCart = async (req, res, next) => {
     const cart = await cartOrder.find({ userID: userID, hotelID: hotelID });
 
     if (cart.length == 0) {
-        res.status(200).send({ message: "cart not found", items: [] });
+        res.status(200).send({ message: "cart not found, nothing to get from cart", items: [] });
     }
     else {
         const orderItems = cart[0]?.orderItems;
@@ -81,15 +81,15 @@ exports.deleteCart = catchAsyncError(async (req, res, next) => {
 exports.removeFromCart = catchAsyncError(async (req, res, next) => {
     const itemID = req.query.itemID;
     const hotelID = req.query.hotelID;
-    const userID = req.body.userID;
-    console.log(itemID)
+    const userID = req.userID;
+    console.log(itemID, hotelID)
     var cart = await cartOrder.findOne({ userID: userID, hotelID: hotelID });
     if (cart) {
         await cart.deleteItem(itemID);
         res.status(200).send({ success: true, message: "removed from cart Successfully", ...cart });
     }
     else {
-        res.status(401).send({
+        res.status(201).send({
             success: false,
             message: "item ID not found in the request",
         })
