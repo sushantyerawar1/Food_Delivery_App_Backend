@@ -82,7 +82,7 @@ exports.removeFromCart = catchAsyncError(async (req, res, next) => {
     const itemID = req.query.itemID;
     const hotelID = req.query.hotelID;
     const userID = req.userID;
-    console.log(itemID, hotelID)
+
     var cart = await cartOrder.findOne({ userID: userID, hotelID: hotelID });
     if (cart) {
         await cart.deleteItem(itemID);

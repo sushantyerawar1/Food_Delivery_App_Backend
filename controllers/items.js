@@ -31,7 +31,7 @@ exports.getItems = async (req, res) => {
 
 exports.deleteItem = async (req, res) => {
     const itemId = req.body.itemId;
-    console.log(itemId, "itemid")
+
     try {
         const item = await Items.findOneAndDelete({ _id: itemId });
         return res.status(200).json({
@@ -75,7 +75,7 @@ exports.updateItem = async (req, res) => {
                 rating,
                 category
             });
-            // console.log('OrderUpdated', UpdatedItem);
+
             return res.status(200).json({ msg: "Item Updated Successfully" });
         }
     } catch (err) {
