@@ -221,7 +221,7 @@ const verifymailsenderonaccountcreation = async (email, hashPassword, id) => {
 
         const secret = process.env.JWT_SECRET + hashPassword;
         const token = jwt.sign({ email: email, id: id }, secret, {
-            expiresIn: "5m"
+            expiresIn: "4h"
         })
         const link = `http://localhost:3000/verifymailonaccountcreation/${id}/${token}`;
         var transporter = await nodemailer.createTransport({

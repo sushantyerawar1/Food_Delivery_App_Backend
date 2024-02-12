@@ -47,12 +47,14 @@ const cartRoutes = require('./routes/cartOrderRoutes');
 const itemRoutes = require('./routes/items');
 const orderRoutes = require('./routes/orders')
 const contactRoutes = require('./routes/contact')
+const groupOrders = require('./routes/groupOrders')
 
 app.use('/api/auth', authRoutes);
 app.use('/api/v1', cartRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/groupOrders',groupOrders);
 
 
 
