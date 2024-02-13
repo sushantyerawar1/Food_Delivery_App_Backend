@@ -62,7 +62,7 @@ exports.getCart = async (req, res, next) => {
     }
     else {
         const orderItems = cart[0]?.orderItems;
-        res.status(200).send({ message: "cart found", items: orderItems });
+        res.status(200).send({ message: "cart found", items: orderItems, cartid: cart[0]._id });
     }
 };
 
