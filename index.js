@@ -5,6 +5,7 @@ const env = require('dotenv');
 var cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+const Logger = require('./logs/log');
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -34,4 +35,7 @@ app.use(express.json());
 app.listen(process.env.PORT_NUMBER, () => {
     console.log(`server started on http://localhost:${process.env.PORT_NUMBER}`);
 })
+
+const logger = new Logger('app.log');
+logger.log('Server started');
 

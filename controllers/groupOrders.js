@@ -4,7 +4,7 @@ const ErrorHandler = require('../utils/errorhandler');
 const { getItem, getCart } = require("./../services/groupCartOrder");
 const Cart = require("../models/cartOrders");
 exports.createGroup = async (req, res) => {
-    const { hotelId, userName, userId, groupId, groupName } = req.body;
+    const { hotelId, userName, userId, groupId, groupName, hotelName } = req.body;
     const userIds = [userId];
     const adminId = userId;
     const cartItemsForUser = [];
@@ -16,11 +16,10 @@ exports.createGroup = async (req, res) => {
             groupId,
             groupName,
             userIds,
-            // orderStatus,
+            hotelName,
             cartItems: new Map(),
         });
 
-        // group.orderStatus.set("ORDER_PENDING")
         group.cartItems.set(userId, { userId, userName, items: cartItemsForUser });
 
         await group.save();
@@ -49,6 +48,41 @@ exports.joinGroup = async (req, res) => {
         await group.save();
 
         return res.status(201).json({ msg: "User Added Successfully" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ msg: error });
+    }
+};
+
+exports.fetchGroup = async (req, res) => {
+    const { groupId } = req.body;
+    const group = await Groups.findOne({ groupId: groupId });
+    if (!group) {
+        return res.status(400).json({ msg: "Group Not Found" })
+    }
+    try {
+        const cart = group.cartItems;
+        const admin = group.adminId;
+        var temp = [];
+        var indv = [];
+        var total = 0;
+        console.log()
+        cart.forEach((ele) => {
+            var indvtotal = 0;
+            var t = [...ele];
+            console.log();
+            t[0].items.forEach((item) => {
+                indvtotal += item.price * item.quantity;
+            });
+
+            total += indvtotal;
+            console.log("here", t[0].indvtotal)
+            temp.push(t[0]);
+            indv.push(indvtotal);
+        });
+        console.log(temp);
+
+        return res.status(201).json({ msg: "Cart Fetched Successfully", cart: temp, adminId: admin, total: total, indvtotal: indv });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ msg: error });
@@ -147,13 +181,16 @@ exports.addCartToGroup = catchAsyncError(async (req, res, next) => {
     const { groupId, cartId, userId, userName } = req.body;
     const group = await Groups.findOne({ groupId: groupId });
     const cart = await Cart.findOne({ _id: cartId });
-
-
     if (!cart) {
         return next(new ErrorHandler("cart not found", 404));
     }
     if (!group) {
         return next(new ErrorHandler("Group not found", 404));
+    }
+    const userIndex = await group.userIds.findIndex(ele => ele === userId);
+    console.log(userIndex);
+    if (userIndex === -1) {
+        return next(new ErrorHandler("User not found", 404));
     }
     //  console.log(group);
 
@@ -277,12 +314,12 @@ exports.deliverGroupOrder = async (req, res) => {
 exports.getGroupOrderByUser = async (req, res) => {
     const { userId } = req.body
     try {
-        const userOrders = await Orders.find({ userId: userId });
-        if (!userOrders) {
+        const userGroups = await Groups.find({ userIds: userId });
+        if (!userGroups) {
             return res.status(400).json({ msg: "No such user exists" });
         }
         else {
-            return res.status(201).json({ msg: "Orders fetched successfully", userOrders: userOrders });
+            return res.status(201).json({ msg: "Orders fetched successfully", userGroups: userGroups });
         }
     }
     catch (error) {
@@ -290,15 +327,63 @@ exports.getGroupOrderByUser = async (req, res) => {
     }
 }
 
-exports.getOrderByHotel = async (req, res) => {
+exports.getGroupOrderByHotel = async (req, res) => {
+
     const { hotelId } = req.body
     try {
-        const hotelOrders = await Orders.find({ hotelId: hotelId });
-        if (!hotelOrders) {
+        const hotelGroupOrders = await Groups.find({ hotelId: hotelId });
+
+        if (!hotelGroupOrders) {
             return res.status(400).json({ msg: "No such user exists" });
         }
         else {
-            return res.status(201).json({ msg: "Orders fetched successfully", hotelOrders: hotelOrders });
+            let orders = [];
+            hotelGroupOrders.forEach(group => {
+                if (group.hotelId === hotelId && group.orderStatus !== "ORDER_PENDING") {
+
+                    const userId = group.adminId;
+                    const groupName = group.groupName
+                    const groupId = group.groupId
+                    let amount = 0;
+                    let items = new Map();
+                    group.cartItems.forEach((key, value) => {
+                        key[0].items.forEach(item => {
+                            let currItem = {
+                                name: item.name,
+                                price: item.price,
+                                quantity: item.quantity,
+                                itemID: item.itemID,
+                                imageLink: item.imageLink
+                            }
+                            if (items.has(item.itemID)) {
+                                currItem.quantity += items.get(item.itemID).quantity
+                            }
+                            items.set(item.itemID, currItem)
+                            amount += item.price * item.quantity;
+                        })
+                    })
+
+                    let finalitems = [];
+                    items.forEach(item => {
+                        let temp = JSON.parse(JSON.stringify(item));
+                        finalitems.push(temp);
+                    })
+
+
+                    let order = {
+                        groupName: groupName,
+                        userId: userId,
+                        amount: amount,
+                        items: finalitems,
+                        orderStatus: group.orderStatus,
+                        groupId: groupId
+                    }
+                    orders.push(order)
+
+                }
+            })
+
+            return res.status(201).json({ msg: "Orders fetched successfully", hotelOrders: orders });
         }
     }
     catch (error) {
