@@ -236,7 +236,7 @@ const verifymailsenderonaccountcreation = async (email, hashPassword, id) => {
         var mailOptions = {
             from: 'youremail@gmail.com',
             to: email,
-            subject: 'Password Reset',
+            subject: 'Verify Email',
             text: link
         };
 
