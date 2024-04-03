@@ -69,7 +69,7 @@ exports.signup = async (req, res) => {
 
     } else {
 
-        const { userName, emailId, password } = req.body;
+        const { userName, emailId, password, mobilenumber, address } = req.body;
 
         if (!userName || !emailId || !password) {
             return res.status(400).json({ msg: "Please Enter all the Fields" });

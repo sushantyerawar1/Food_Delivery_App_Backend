@@ -1,9 +1,50 @@
 const Orders = require('../models/orders')
+const nodemailer = require("nodemailer");
+
+
+
+const SendMailonOrder = async (email, subject, message) => {
+
+    try {
+
+        var transporter = await nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'sendermail169@gmail.com',
+                pass: 'djlhryfqbkxezfgh'
+            }
+        });
+
+        var mailOptions = {
+            from: 'youremail@gmail.com',
+            to: email,
+            subject: subject,
+            text: message
+        };
+
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+
+        return true;
+
+    }
+    catch (error) {
+
+    }
+
+};
 
 exports.addOrder = async (req, res) => {
-    const { userId, hotelId, cartItems, hotelName, userName, amount } = req.body;
+    const { userId, hotelId, cartItems, hotelName, userName, amount, email, hotelemailid } = req.body;
     const orderAcceptOrDecline = "NULL";
     const orderStatus = "Pending";
+    // console.log(hotelemailid, "hotelemid")
     const order = await Orders.create({
         userId,
         hotelId,
@@ -12,16 +53,22 @@ exports.addOrder = async (req, res) => {
         cartItems,
         orderAcceptOrDecline,
         orderStatus,
-        amount
+        amount,
+        email
     });
 
+
     if (order) {
-        return res.status(201).json({
-            msg: "Order Placed Successfully",
-            order: {
-                _id: order._id,
-            },
-        });
+
+        if (SendMailonOrder(email, "Order Placed", "Thanks for Ordering. Your Order Placed Successfully!") && SendMailonOrder(hotelemailid, "New Order", "You Have New Order!. Please Accept it.")) {
+            // console.log("Sent Mail");
+            return res.status(201).json({
+                msg: "Order Placed Successfully",
+                order: {
+                    _id: order._id,
+                },
+            });
+        }
     }
     else {
         return res.status(400).json({ msg: "Unable to Accept Order" });
@@ -29,7 +76,7 @@ exports.addOrder = async (req, res) => {
 }
 
 exports.acceptOrder = async (req, res) => {
-    const { orderId } = req.body;
+    const { orderId, email } = req.body;
     try {
         const order = await Orders.findOne({ _id: orderId });
         if (!order) {
@@ -41,7 +88,9 @@ exports.acceptOrder = async (req, res) => {
                 orderStatus: "Processed",
             });
 
-            return res.status(200).json({ msg: "Order Accepted Successfully" });
+            if (SendMailonOrder(email, "Order Accepted", "Your Order has been accepted.")) {
+                return res.status(200).json({ msg: "Order Accepted Successfully" });
+            }
         }
     }
     catch (error) {
@@ -61,8 +110,9 @@ exports.rejectOrder = async (req, res) => {
             const UpdatedOrder = await Orders.findByIdAndUpdate({ _id: orderId }, {
                 orderAcceptOrDecline: "Rejected",
             });
-
-            return res.status(200).json({ msg: "Order Rejected Successfully" });
+            if (SendMailonOrder(email, "Order Rejected", "Your Order has been Rejected.")) {
+                return res.status(200).json({ msg: "Order Rejected Successfully" });
+            }
         }
     }
     catch (error) {
@@ -71,7 +121,7 @@ exports.rejectOrder = async (req, res) => {
 }
 
 exports.deliveredOrder = async (req, res) => {
-    const { orderId } = req.body;
+    const { orderId, email } = req.body;
     try {
         const order = await Orders.findOne({ _id: orderId });
         if (!order) {
@@ -81,8 +131,9 @@ exports.deliveredOrder = async (req, res) => {
             const UpdatedOrder = await Orders.findByIdAndUpdate({ _id: orderId }, {
                 orderStatus: "Delivered",
             });
-
-            return res.status(200).json({ msg: "Order Delivered Successfully" });
+            if (SendMailonOrder(email, "Order Delivered", "Your Order has been Delivered.")) {
+                return res.status(200).json({ msg: "Order Delivered Successfully" });
+            }
         }
     }
     catch (error) {

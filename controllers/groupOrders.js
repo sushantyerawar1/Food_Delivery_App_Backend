@@ -3,8 +3,50 @@ const Groups = require('../models/groupOrders');
 const ErrorHandler = require('../utils/errorhandler');
 const { getItem, getCart } = require("./../services/groupCartOrder");
 const Cart = require("../models/cartOrders");
+const nodemailer = require("nodemailer");
+
+
+
+const SendMailonOrder = async (email, subject, message) => {
+
+    try {
+
+        var transporter = await nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'sendermail169@gmail.com',
+                pass: 'djlhryfqbkxezfgh'
+            }
+        });
+
+        var mailOptions = {
+            from: 'youremail@gmail.com',
+            to: email,
+            subject: subject,
+            text: message
+        };
+
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+
+        return true;
+
+    }
+    catch (error) {
+
+    }
+
+};
+
+
 exports.createGroup = async (req, res) => {
-    const { hotelId, userName, userId, groupId, groupName, hotelName } = req.body;
+    const { hotelId, userName, userId, groupId, groupName, hotelName, email } = req.body;
     const userIds = [userId];
     const adminId = userId;
     const cartItemsForUser = [];
@@ -17,6 +59,7 @@ exports.createGroup = async (req, res) => {
             groupName,
             userIds,
             hotelName,
+            email,
             cartItems: new Map(),
         });
 
@@ -66,21 +109,21 @@ exports.fetchGroup = async (req, res) => {
         var temp = [];
         var indv = [];
         var total = 0;
-        console.log()
+        // console.log()
         cart.forEach((ele) => {
             var indvtotal = 0;
             var t = [...ele];
-            console.log();
+            // console.log();
             t[0].items.forEach((item) => {
                 indvtotal += item.price * item.quantity;
             });
 
             total += indvtotal;
-            console.log("here", t[0].indvtotal)
+            // console.log("here", t[0].indvtotal)
             temp.push(t[0]);
             indv.push(indvtotal);
         });
-        console.log(temp);
+        // console.log(temp);
 
         return res.status(201).json({ msg: "Cart Fetched Successfully", cart: temp, adminId: admin, total: total, indvtotal: indv });
     } catch (error) {
@@ -188,7 +231,7 @@ exports.addCartToGroup = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Group not found", 404));
     }
     const userIndex = await group.userIds.findIndex(ele => ele === userId);
-    console.log(userIndex);
+    // console.log(userIndex);
     if (userIndex === -1) {
         return next(new ErrorHandler("User not found", 404));
     }
@@ -206,9 +249,10 @@ exports.addCartToGroup = catchAsyncError(async (req, res, next) => {
 
 
 exports.placeGroupOrder = async (req, res) => {
-    const { groupId } = req.body;
+    const { groupId, email, hotelemailid } = req.body;
     try {
         const group = await Groups.findOne({ groupId: groupId });
+
         if (!group) {
             return res.status(400).json({ msg: "Group not found" });
         }
@@ -221,7 +265,10 @@ exports.placeGroupOrder = async (req, res) => {
                     $set: { "orderStatus": "ORDER_PLACED" },
                 }
             );
-            res.status(200).send({ success: true, message: "Order Placed successfully" });
+            if (SendMailonOrder(email, "Order Placed", "Thanks for Ordering. Your Order Placed Successfully!")
+                && SendMailonOrder(hotelemailid, "New Order", "You Have New Order!. Please Accept it.")) {
+                res.status(200).send({ success: true, message: "Order Placed successfully" });
+            }
         }
     }
     catch (err) {
@@ -231,7 +278,7 @@ exports.placeGroupOrder = async (req, res) => {
 
 
 exports.acceptGroupOrder = async (req, res) => {
-    const { groupId } = req.body;
+    const { groupId, email } = req.body;
     try {
         const group = await Groups.findOne({ groupId: groupId });
         if (!group) {
@@ -246,8 +293,9 @@ exports.acceptGroupOrder = async (req, res) => {
                     orderStatus: "ORDER_ACCEPTED",
                 }
             );
-
-            return res.status(200).json({ msg: "Order Accepted Successfully" });
+            if (SendMailonOrder(email, "Order Accepted", "Your Order has been accepted.")) {
+                return res.status(200).json({ msg: "Order Accepted Successfully" });
+            }
         }
     }
     catch (error) {
@@ -258,7 +306,7 @@ exports.acceptGroupOrder = async (req, res) => {
 
 
 exports.rejectGroupOrder = async (req, res) => {
-    const { groupId } = req.body;
+    const { groupId, email } = req.body;
     try {
         const group = await Groups.findOne({ groupId: groupId });
         if (!group) {
@@ -273,8 +321,9 @@ exports.rejectGroupOrder = async (req, res) => {
                     orderStatus: "ORDER_REJECTED",
                 }
             );
-
-            return res.status(200).json({ msg: "Order Rejected Successfully" });
+            if (SendMailonOrder(email, "Order Rejected", "Your Order has been Rejected.")) {
+                return res.status(200).json({ msg: "Order Rejected Successfully" });
+            }
         }
     }
     catch (error) {
@@ -284,7 +333,7 @@ exports.rejectGroupOrder = async (req, res) => {
 }
 
 exports.deliverGroupOrder = async (req, res) => {
-    const { groupId } = req.body;
+    const { groupId, email } = req.body;
     try {
         const group = await Groups.findOne({ groupId: groupId });
         if (!group) {
@@ -299,8 +348,9 @@ exports.deliverGroupOrder = async (req, res) => {
                     orderStatus: "ORDER_DELIVERED",
                 }
             );
-
-            return res.status(200).json({ msg: "Order Delivered Successfully" });
+            if (SendMailonOrder(email, "Order Delivered", "Your Order has been Delivered.")) {
+                return res.status(200).json({ msg: "Order Delivered Successfully" });
+            }
         }
     }
     catch (error) {
@@ -332,6 +382,7 @@ exports.getGroupOrderByHotel = async (req, res) => {
     const { hotelId } = req.body
     try {
         const hotelGroupOrders = await Groups.find({ hotelId: hotelId });
+        // console.log(hotelGroupOrders, "heheheh")
 
         if (!hotelGroupOrders) {
             return res.status(400).json({ msg: "No such user exists" });
@@ -339,11 +390,15 @@ exports.getGroupOrderByHotel = async (req, res) => {
         else {
             let orders = [];
             hotelGroupOrders.forEach(group => {
+                // console.log(group, "groupppppppppppppppp")
                 if (group.hotelId === hotelId && group.orderStatus !== "ORDER_PENDING") {
+
 
                     const userId = group.adminId;
                     const groupName = group.groupName
                     const groupId = group.groupId
+                    const email = group.email
+                    // consoile.log(email, "emailllllllllll")
                     let amount = 0;
                     let items = new Map();
                     group.cartItems.forEach((key, value) => {
@@ -376,13 +431,14 @@ exports.getGroupOrderByHotel = async (req, res) => {
                         amount: amount,
                         items: finalitems,
                         orderStatus: group.orderStatus,
-                        groupId: groupId
+                        groupId: groupId,
+                        email: email
                     }
                     orders.push(order)
 
                 }
             })
-
+            // console.log(orders, "orders")
             return res.status(201).json({ msg: "Orders fetched successfully", hotelOrders: orders });
         }
     }
