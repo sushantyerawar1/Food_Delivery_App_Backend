@@ -95,7 +95,9 @@ exports.signup = async (req, res) => {
             emailId,
             hashPassword,
             role,
-            isVerified
+            isVerified,
+            address,
+            mobilenumber
         });
 
         const token = jwt.sign({
@@ -159,7 +161,9 @@ exports.login = async (req, res) => {
                     _id: user._id,
                     userName: user.userName,
                     emailId: user.emailId,
-                    role: user.role
+                    role: user.role,
+                    mobilenumber: user.mobilenumber,
+                    address: user.address
                 },
                 Token: { token }
             });
@@ -414,3 +418,44 @@ exports.getHotels = async (req, res, next) => {
         })
     }
 }
+
+
+exports.userinfo = async (req, res) => {
+    const { id } = req.body;
+
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+        return res.status(400).json({ msg: "User Not Found" });
+    }
+
+    try {
+        return res.status(201).json({ msg: "User Info Fetched Successfully", info: user });
+    } catch (error) {
+        return res.status(400).json({ msg: "Unable to fetch info" });
+    }
+};
+
+exports.edituserinfo = async (req, res) => {
+    const { id, userName, mobilenumber, address, description } = req.body;
+
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+        return res.status(400).json({ msg: "User Not Found" });
+    }
+
+    try {
+        await User.updateOne({
+            _id: id,
+        }, {
+            $set: {
+                userName: userName,
+                mobilenumber: mobilenumber,
+                address: address,
+                description: description
+            }
+        })
+        return res.status(201).json({ msg: "User Info Updated Successfully", info: user });
+    } catch (error) {
+        return res.status(400).json({ msg: "Unable to fetch info" });
+    }
+};
