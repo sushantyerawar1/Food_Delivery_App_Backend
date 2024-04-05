@@ -364,9 +364,9 @@ exports.deliverGroupOrder = async (req, res) => {
 
 
 exports.getGroupOrderByUser = async (req, res) => {
-    const { userId } = req.body
+    const { userId, hotelId } = req.body
     try {
-        const userGroups = await Groups.find({ userIds: userId });
+        const userGroups = await Groups.find({ userIds: userId, hotelId: hotelId });
         if (!userGroups) {
             return res.status(400).json({ msg: "No such user exists" });
         }
