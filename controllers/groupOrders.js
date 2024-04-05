@@ -46,7 +46,7 @@ const SendMailonOrder = async (email, subject, message) => {
 
 
 exports.createGroup = async (req, res) => {
-    const { hotelId, userName, userId, groupId, groupName, hotelName, email } = req.body;
+    const { hotelId, userName, userId, groupId, groupName, hotelName, email, userMobileNumber, hotelMobileNumber } = req.body;
     const userIds = [userId];
     const adminId = userId;
     const cartItemsForUser = [];
@@ -60,6 +60,8 @@ exports.createGroup = async (req, res) => {
             userIds,
             hotelName,
             email,
+            userMobileNumber,
+            hotelMobileNumber,
             cartItems: new Map(),
         });
 
@@ -390,7 +392,7 @@ exports.getGroupOrderByHotel = async (req, res) => {
         else {
             let orders = [];
             hotelGroupOrders.forEach(group => {
-                // console.log(group, "groupppppppppppppppp")
+                console.log(group, "groupppppppppppppppp")
                 if (group.hotelId === hotelId && group.orderStatus !== "ORDER_PENDING") {
 
 
@@ -398,7 +400,7 @@ exports.getGroupOrderByHotel = async (req, res) => {
                     const groupName = group.groupName
                     const groupId = group.groupId
                     const email = group.email
-                    // consoile.log(email, "emailllllllllll")
+                    // consoile.log(group, "groupgroupgroupgroup")
                     let amount = 0;
                     let items = new Map();
                     group.cartItems.forEach((key, value) => {
@@ -432,7 +434,9 @@ exports.getGroupOrderByHotel = async (req, res) => {
                         items: finalitems,
                         orderStatus: group.orderStatus,
                         groupId: groupId,
-                        email: email
+                        email: email,
+                        userMobileNumber: group.userMobileNumber,
+                        hotelMobileNumber: group.hotelMobileNumber
                     }
                     orders.push(order)
 

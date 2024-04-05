@@ -21,6 +21,16 @@ const orderSchema = new mongoose.Schema({
         // ref: 'User',
         required: true,
     },
+    userMobileNumber: {
+        type: Number,
+        // ref: 'User',
+        required: true,
+    },
+    hotelMobileNumber: {
+        type: Number,
+        // ref: 'User',
+        required: true,
+    },
     email: {
         type: String,
         // ref: 'User',

@@ -27,6 +27,16 @@ const groupOrderSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  userMobileNumber: {
+    type: Number,
+    // ref: 'User',
+    required: false,
+  },
+  hotelMobileNumber: {
+    type: Number,
+    // ref: 'User',
+    required: false,
+  },
   email: {
     type: String,
     required: false,
@@ -111,11 +121,13 @@ groupOrderSchema.methods.addItem = function (userId, userName, item) {
 };
 
 groupOrderSchema.methods.addCartToGroup = function (cart, userId, userName) {
-  // console.log(userId);
+  // console.log(userMobileNumber, hotelMobileNumber, 'hotelMobileNumberhotelMobileNumberhotelMobileNumberhotelMobileNumberhotelMobileNumber');
   this.cartItems.set(userId, {
     userId: userId,
     userName: userName,
-    items: cart.orderItems
+    items: cart.orderItems,
+    // hotelMobileNumber: hotelMobileNumber,
+    // userMobileNumber: userMobileNumber
   });
   // console.log(this.cartItems) ;
   this.save().then(() => {

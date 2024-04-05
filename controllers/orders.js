@@ -41,10 +41,10 @@ const SendMailonOrder = async (email, subject, message) => {
 };
 
 exports.addOrder = async (req, res) => {
-    const { userId, hotelId, cartItems, hotelName, userName, amount, email, hotelemailid } = req.body;
+    const { userId, hotelId, cartItems, hotelName, userName, amount, email, hotelemailid, userMobileNumber, hotelMobileNumber } = req.body;
     const orderAcceptOrDecline = "NULL";
     const orderStatus = "Pending";
-    // console.log(hotelemailid, "hotelemid")
+    // console.log(userMobileNumber, hotelMobileNumber, "hotelemid")
     const order = await Orders.create({
         userId,
         hotelId,
@@ -54,7 +54,9 @@ exports.addOrder = async (req, res) => {
         orderAcceptOrDecline,
         orderStatus,
         amount,
-        email
+        email,
+        userMobileNumber,
+        hotelMobileNumber
     });
 
 
@@ -109,6 +111,7 @@ exports.rejectOrder = async (req, res) => {
         else {
             const UpdatedOrder = await Orders.findByIdAndUpdate({ _id: orderId }, {
                 orderAcceptOrDecline: "Rejected",
+                orderStatus: "Rejected"
             });
             if (SendMailonOrder(email, "Order Rejected", "Your Order has been Rejected.")) {
                 return res.status(200).json({ msg: "Order Rejected Successfully" });
