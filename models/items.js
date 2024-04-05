@@ -39,6 +39,10 @@ const itemSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
+    itemStatus: {
+        type: String,
+        required: false,
+    },
     reviews: [
         {
             type: String,

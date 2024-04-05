@@ -4,6 +4,9 @@ const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const nodemailer = require("nodemailer");
 const axios = require("axios")
+const env = require('dotenv');
+
+env.config();
 
 
 exports.signup = async (req, res) => {
@@ -230,7 +233,7 @@ const verifymailsenderonaccountcreation = async (email, hashPassword, id) => {
         const token = jwt.sign({ email: email, id: id }, secret, {
             expiresIn: "4h"
         })
-        const link = `http://localhost:3000/verifymailonaccountcreation/${id}/${token}`;
+        const link = `${process.env.API_URL}verifymailonaccountcreation/${id}/${token}`;
         var transporter = await nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -327,7 +330,7 @@ exports.forgotpassword = async (req, res) => {
             const token = jwt.sign({ email: user.emailId, id: user._id }, secret, {
                 expiresIn: "5m"
             })
-            const link = `http://localhost:3000/reset-password/${user._id}/${token}`;
+            const link = `${process.env.API_URL}reset-password/${user._id}/${token}`;
             var transporter = await nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
@@ -438,7 +441,8 @@ exports.userinfo = async (req, res) => {
 };
 
 exports.edituserinfo = async (req, res) => {
-    const { id, userName, mobilenumber, address, description } = req.body;
+    const { id, userName, mobilenumber, address, description, hotelStatus } = req.body;
+    // console.log(hotelStatus, "hotelstatus")
 
     const user = await User.findOne({ _id: id });
     if (!user) {
@@ -453,7 +457,8 @@ exports.edituserinfo = async (req, res) => {
                 userName: userName,
                 mobilenumber: mobilenumber,
                 address: address,
-                description: description
+                description: description,
+                hotelStatus: hotelStatus
             }
         })
         return res.status(201).json({ msg: "User Info Updated Successfully", info: user });

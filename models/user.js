@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         required: true,
+    },
+    hotelStatus: {
+        type: String,
+        required: false,
     }
 }, { timestaps: true })
 
