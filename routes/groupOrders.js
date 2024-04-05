@@ -13,7 +13,8 @@ const {
   rejectGroupOrder,
   deliverGroupOrder,
   getGroupOrderByUser,
-  getGroupOrderByHotel
+  getGroupOrderByHotel,
+  getGroupByUser
 } = require("./../controllers/groupOrders");
 
 const router = express.Router();
@@ -31,6 +32,7 @@ router.post("/acceptGroupOrder", acceptGroupOrder);
 router.post("/rejectGroupOrder", rejectGroupOrder);
 router.post("/deliverGroupOrder", deliverGroupOrder);
 router.post("/getusergrouporders", getGroupOrderByUser);
+router.post("/getgroupbyuser", getGroupByUser);
 router.post("/gethotelgrouporders", getGroupOrderByHotel);
 
 

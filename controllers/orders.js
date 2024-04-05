@@ -148,6 +148,7 @@ exports.getOrderByUser = async (req, res) => {
     const { userId } = req.body
     try {
         const userOrders = await Orders.find({ userId: userId });
+        // console.log(userOrders, "userorders")
         if (!userOrders) {
             return res.status(400).json({ msg: "No such user exists" });
         }
