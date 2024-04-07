@@ -270,10 +270,10 @@ exports.placeGroupOrder = async (req, res) => {
                     },
                 }
             );
-            // if (SendMailonOrder(email, "Order Placed", "Thanks for Ordering. Your Order Placed Successfully!")
-            //     && SendMailonOrder(hotelemailid, "New Order", "You Have New Order!. Please Accept it.")) {
-            res.status(200).send({ success: true, message: "Order Placed successfully" });
-            // }
+            if (SendMailonOrder(email, "Order Placed", "Thanks for Ordering. Your Order Placed Successfully!")
+                && SendMailonOrder(hotelemailid, "New Order", "You Have New Order!. Please Accept it.")) {
+                res.status(200).send({ success: true, message: "Order Placed successfully" });
+            }
         }
     }
     catch (err) {
