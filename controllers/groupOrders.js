@@ -251,7 +251,7 @@ exports.addCartToGroup = catchAsyncError(async (req, res, next) => {
 
 
 exports.placeGroupOrder = async (req, res) => {
-    const { groupId, email, hotelemailid } = req.body;
+    const { groupId, email, hotelemailid, address } = req.body;
     try {
         const group = await Groups.findOne({ groupId: groupId });
 
@@ -264,13 +264,16 @@ exports.placeGroupOrder = async (req, res) => {
                     groupId: groupId
                 },
                 {
-                    $set: { "orderStatus": "ORDER_PLACED" },
+                    $set: {
+                        "orderStatus": "ORDER_PLACED",
+                        "address": address
+                    },
                 }
             );
-            if (SendMailonOrder(email, "Order Placed", "Thanks for Ordering. Your Order Placed Successfully!")
-                && SendMailonOrder(hotelemailid, "New Order", "You Have New Order!. Please Accept it.")) {
-                res.status(200).send({ success: true, message: "Order Placed successfully" });
-            }
+            // if (SendMailonOrder(email, "Order Placed", "Thanks for Ordering. Your Order Placed Successfully!")
+            //     && SendMailonOrder(hotelemailid, "New Order", "You Have New Order!. Please Accept it.")) {
+            res.status(200).send({ success: true, message: "Order Placed successfully" });
+            // }
         }
     }
     catch (err) {
@@ -452,7 +455,8 @@ exports.getGroupOrderByHotel = async (req, res) => {
                         groupId: groupId,
                         email: email,
                         userMobileNumber: group.userMobileNumber,
-                        hotelMobileNumber: group.hotelMobileNumber
+                        hotelMobileNumber: group.hotelMobileNumber,
+                        address: group.address
                     }
                     orders.push(order)
 

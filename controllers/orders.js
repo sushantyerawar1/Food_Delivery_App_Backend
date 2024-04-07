@@ -41,7 +41,7 @@ const SendMailonOrder = async (email, subject, message) => {
 };
 
 exports.addOrder = async (req, res) => {
-    const { userId, hotelId, cartItems, hotelName, userName, amount, email, hotelemailid, userMobileNumber, hotelMobileNumber } = req.body;
+    const { userId, hotelId, cartItems, hotelName, userName, amount, email, hotelemailid, userMobileNumber, hotelMobileNumber, address } = req.body;
     const orderAcceptOrDecline = "NULL";
     const orderStatus = "Pending";
     // console.log(userMobileNumber, hotelMobileNumber, "hotelemid")
@@ -56,7 +56,8 @@ exports.addOrder = async (req, res) => {
         amount,
         email,
         userMobileNumber,
-        hotelMobileNumber
+        hotelMobileNumber,
+        address
     });
 
 

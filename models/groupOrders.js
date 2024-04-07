@@ -41,6 +41,10 @@ const groupOrderSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  address: {
+    type: String,
+    required: false,
+  },
   cartItems: {
     type: Map,
     of: [

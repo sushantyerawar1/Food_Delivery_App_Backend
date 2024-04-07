@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema({
     hotelStatus: {
         type: String,
         required: false,
+    },
+    minimumAmount: {
+        type: Number,
+        default: 0,
+        required: false,
     }
 }, { timestaps: true })
 

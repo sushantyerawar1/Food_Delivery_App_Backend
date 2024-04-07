@@ -441,7 +441,7 @@ exports.userinfo = async (req, res) => {
 };
 
 exports.edituserinfo = async (req, res) => {
-    const { id, userName, mobilenumber, address, description, hotelStatus } = req.body;
+    const { id, userName, mobilenumber, address, description, hotelStatus, minimumAmount } = req.body;
     // console.log(hotelStatus, "hotelstatus")
 
     const user = await User.findOne({ _id: id });
@@ -458,7 +458,8 @@ exports.edituserinfo = async (req, res) => {
                 mobilenumber: mobilenumber,
                 address: address,
                 description: description,
-                hotelStatus: hotelStatus
+                hotelStatus: hotelStatus,
+                minimumAmount: minimumAmount
             }
         })
         return res.status(201).json({ msg: "User Info Updated Successfully", info: user });

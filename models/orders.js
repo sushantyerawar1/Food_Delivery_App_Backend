@@ -36,6 +36,11 @@ const orderSchema = new mongoose.Schema({
         // ref: 'User',
         required: true,
     },
+    address: {
+        type: String,
+        // ref: 'User',
+        required: true,
+    },
     amount: {
         type: Number,
         // ref: 'User',
