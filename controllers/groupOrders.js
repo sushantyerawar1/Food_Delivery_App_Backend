@@ -82,9 +82,9 @@ exports.joinGroup = async (req, res) => {
     const { userName, userId, groupId, hotelId } = req.body;
     const group = await Groups.findOne({ groupId: groupId });
     if (!group) {
-        return res.status(200).json({ msg: "Group Not Found" })
+        return res.status(200).json({ msg: "This group id does not exists." })
     } else if (group.hotelId != hotelId) {
-        return res.status(202).json({ msg: "Mismatched Group Id" });
+        return res.status(202).json({ msg: "This group id belongs to some different shop." });
     }
     try {
         group.userIds.push(userId)
@@ -102,7 +102,7 @@ exports.fetchGroup = async (req, res) => {
     const { groupId } = req.body;
     const group = await Groups.findOne({ groupId: groupId });
     if (!group) {
-        return res.status(400).json({ msg: "Group Not Found" })
+        return res.status(400).json({ msg: "This group id does not exists." })
     }
     try {
         const cart = group.cartItems;
@@ -141,7 +141,7 @@ exports.addItem = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Item not found", 404));
     }
     if (!group) {
-        return next(new ErrorHandler("Group not found", 404));
+        return next(new ErrorHandler("This group id does not exists.", 404));
     }
     try {
         await group.addItem(userId, userName, item);
@@ -169,7 +169,7 @@ exports.removeItem = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Item not found", 404));
     }
     if (!group) {
-        return next(new ErrorHandler("Group not found", 404));
+        return next(new ErrorHandler("This group id does not exists.", 404));
     }
 
     try {
@@ -188,7 +188,7 @@ exports.deleteItem = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Item not found", 404));
     }
     if (!group) {
-        return next(new ErrorHandler("Group not found", 404));
+        return next(new ErrorHandler("This group id does not exists.", 404));
     }
 
     try {
@@ -208,7 +208,7 @@ exports.deleteCart = catchAsyncError(async (req, res, next) => {
     const group = await Groups.findOne({ groupId: groupId });
 
     if (!group) {
-        return next(new ErrorHandler("Group not found", 404));
+        return next(new ErrorHandler("This group id does not exists.", 404));
     }
 
     try {
@@ -227,15 +227,15 @@ exports.addCartToGroup = catchAsyncError(async (req, res, next) => {
     const cart = await Cart.findOne({ _id: cartId });
     // console.log(group.hotelId, "group")
     if (!cart) {
-        return res.status(201).json({ message: "Group not found" });
+        return res.status(201).json({ message: "This group id does not exists." });
         // return next(new ErrorHandler("cart not found", 201));
     }
     if (!group) {
-        return res.status(201).json({ message: "Group not found" });
+        return res.status(201).json({ message: "This group id does not exists." });
 
-        // return next(new ErrorHandler("Group not found", 201));
+        // return next(new ErrorHandler("This group id does not exists.", 201));
     } else if (group.hotelId != hotelId) {
-        return res.status(201).json({ message: "Mismatched Group Order" });
+        return res.status(201).json({ message: "This group id belongs to some different shop." });
         // return next(new ErrorHandler("Mismatched Group Order", 201));
     }
     const userIndex = await group.userIds.findIndex(ele => ele === userId);
@@ -262,7 +262,7 @@ exports.placeGroupOrder = async (req, res) => {
         const group = await Groups.findOne({ groupId: groupId });
 
         if (!group) {
-            return res.status(400).json({ msg: "Group not found" });
+            return res.status(400).json({ msg: "This group id does not exists." });
         }
         else {
             await Groups.findOneAndUpdate(
@@ -293,7 +293,7 @@ exports.acceptGroupOrder = async (req, res) => {
     try {
         const group = await Groups.findOne({ groupId: groupId });
         if (!group) {
-            return res.status(400).json({ msg: "Group not found" });
+            return res.status(400).json({ msg: "This group id does not exists." });
         }
         else {
             await Groups.findOneAndUpdate(
@@ -321,7 +321,7 @@ exports.rejectGroupOrder = async (req, res) => {
     try {
         const group = await Groups.findOne({ groupId: groupId });
         if (!group) {
-            return res.status(400).json({ msg: "Group not found" });
+            return res.status(400).json({ msg: "This group id does not exists." });
         }
         else {
             await Groups.findOneAndUpdate(
@@ -348,7 +348,7 @@ exports.deliverGroupOrder = async (req, res) => {
     try {
         const group = await Groups.findOne({ groupId: groupId });
         if (!group) {
-            return res.status(400).json({ msg: "Group not found" });
+            return res.status(400).json({ msg: "This group id does not exists." });
         }
         else {
             await Groups.findOneAndUpdate(
