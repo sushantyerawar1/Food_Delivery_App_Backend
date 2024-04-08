@@ -79,19 +79,18 @@ exports.createGroup = async (req, res) => {
 
 
 exports.joinGroup = async (req, res) => {
-    const { userName, userId, groupId } = req.body;
+    const { userName, userId, groupId, hotelId } = req.body;
     const group = await Groups.findOne({ groupId: groupId });
     if (!group) {
-        return res.status(400).json({ msg: "Group Not Found" })
+        return res.status(200).json({ msg: "Group Not Found" })
+    } else if (group.hotelId != hotelId) {
+        return res.status(202).json({ msg: "Mismatched Group Id" });
     }
     try {
         group.userIds.push(userId)
         const cartItemsForUser = [];
-
         group.cartItems.set(userId, { userId, userName, items: cartItemsForUser });
-
         await group.save();
-
         return res.status(201).json({ msg: "User Added Successfully" });
     } catch (error) {
         console.error(error);
@@ -223,14 +222,21 @@ exports.deleteCart = catchAsyncError(async (req, res, next) => {
 
 
 exports.addCartToGroup = catchAsyncError(async (req, res, next) => {
-    const { groupId, cartId, userId, userName } = req.body;
+    const { groupId, cartId, userId, userName, hotelId } = req.body;
     const group = await Groups.findOne({ groupId: groupId });
     const cart = await Cart.findOne({ _id: cartId });
+    // console.log(group.hotelId, "group")
     if (!cart) {
-        return next(new ErrorHandler("cart not found", 404));
+        return res.status(201).json({ message: "Group not found" });
+        // return next(new ErrorHandler("cart not found", 201));
     }
     if (!group) {
-        return next(new ErrorHandler("Group not found", 404));
+        return res.status(201).json({ message: "Group not found" });
+
+        // return next(new ErrorHandler("Group not found", 201));
+    } else if (group.hotelId != hotelId) {
+        return res.status(201).json({ message: "Mismatched Group Order" });
+        // return next(new ErrorHandler("Mismatched Group Order", 201));
     }
     const userIndex = await group.userIds.findIndex(ele => ele === userId);
     // console.log(userIndex);
@@ -242,10 +248,10 @@ exports.addCartToGroup = catchAsyncError(async (req, res, next) => {
     try {
         await group.addCartToGroup(cart, userId, userName);
         //  console.log(group); 
-        res.status(200).send({ success: true, message: "Cart Added successfully" });
+        res.status(200).json({ success: true, message: "Cart Added successfully" });
     }
     catch (err) {
-        res.status(500).send({ success: false, message: "Error Adding Cart to Group", error: err, });
+        res.status(500).json({ success: false, message: "Error Adding Cart to Group", error: err, });
     }
 });
 
