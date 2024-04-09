@@ -6,8 +6,10 @@ var cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const Logger = require('./logs/log');
+const rateLimiter = require('./middlewares/rateLimiter');
 
 
+app.use(rateLimiter);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('tiny'));
 env.config();
@@ -24,10 +26,10 @@ mongoose.connect(
 });
 
 
-app.options("*", cors({ origin: 'http://localhost:3000', optionsSuccessStatus: 200 }));
+app.options("*", cors({ origin: '*', optionsSuccessStatus: 200 }));
 
-app.use(cors({ origin: "http://localhost:3000", optionsSuccessStatus: 200 }));
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: "*", optionsSuccessStatus: 200 }));
+app.use(cors({ origin: "*", credentials: true }));
 
 app.use(express.json());
 

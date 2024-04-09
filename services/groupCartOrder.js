@@ -9,6 +9,6 @@ exports.getItem = catchAsyncError(async (itemId) => {
 
 exports.getCart = catchAsyncError(async (cartId) => {
       const cart = await Cart.findOne({ _id: cartId });
-      console.log("services", cart);
+      //  console.log("services" , cart) ; 
       return cart;
 })

@@ -11,7 +11,7 @@ app.use(express.json());
 app.use((req, res, next) => {
 
     // Set the allowed origins
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // Replace with your frontend domain
+    res.header('Access-Control-Allow-Origin', '*'); // Replace with your frontend domain
 
     // Set the allowed methods
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 
 
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Origin', '*');
     res.header(
         'Access-Control-Allow-Headers',
         'Origin, X-Requested-With, Content-Type, Accept'
